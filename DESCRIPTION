@@ -1,0 +1,28 @@
+Package: homerkit
+Type: Package
+Title: Read HOMER motif analysis output in R.
+Version: 0.1.0
+Date: 2016-11-17
+Authors@R: c(
+    person("Kamil", "Slowikowski", email = "kslowikowski@gmail.com", role = c("aut", "cre"))
+  )
+Maintainer: Kamil Slowikowski <kslowikowski@gmail.com>
+Description: Provides functions for reading HTML outputs from HOMER motif
+  analysis output. HOMER is software for motif discovery and next-gen
+  sequencing analysis by Chuck Benner (http://homer.salk.edu/homer/).
+License: GPL-2 | file LICENSE
+URL: https://github.com/slowkow/homerkit
+BugReports: https://github.com/slowkow/homerkit/issues
+VignetteBuilder: knitr
+Encoding: UTF-8
+LazyData: true
+Imports:
+    XML,
+    readr,
+    reshape2,
+    stringr,
+    tibble
+Suggests:
+    knitr,
+    rmarkdown
+RoxygenNote: 5.0.1
