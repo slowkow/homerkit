@@ -150,3 +150,7 @@ repository.
 
 [issues]: https://github.com/slowkow/homerkit/issues
 [pull]: https://help.github.com/articles/using-pull-requests/
+
+## Related work
+
+- https://github.com/MalteThodberg/homeR
