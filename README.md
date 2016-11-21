@@ -63,7 +63,7 @@ h <- read_homer_output("output")
 Novel motif target genes:
 
 ```r
-head(split(h$novel_motif_targets$gene_name, h$novel_motif_targets$motif), 3)
+head(split(h$novel_motif_peaks$gene_name, h$novel_motif_peaks$motif), 3)
 ```
 
 ```
@@ -105,7 +105,7 @@ subset(h$novel_motif_tfs, motif == "motif1")
 Known motif target genes:
 
 ```r
-head(split(h$known_motif_targets$gene_name, h$known_motif_targets$motif), 3)
+head(split(h$known_motif_peaks$gene_name, h$known_motif_peaks$motif), 3)
 ```
 
 ```
@@ -129,7 +129,7 @@ $known11
 Known transcription factors:
 
 ```r
-head(unique(h$known_motif_targets[,c("motif", "best_guess")]), 3)
+head(unique(h$known_motif_peaks[,c("motif", "best_guess")]), 3)
 ```
 
 ```
