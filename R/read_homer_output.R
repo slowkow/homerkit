@@ -1,27 +1,44 @@
 #' Read known and novel motif outputs from a HOMER output folder.
 #'
 #' @export
-read_homer_output <- function(folder = "") {
+read_homer_output <- function(folder = "", max_files = 100) {
 
   # Put all of the data in a list.
   retval <- list()
 
   # Genes with novel motifs in their promoters --------------------------------
   novel_motif_files <- Sys.glob(
-    paths = file.path(folder, "homerResults", "motif*.motif.tsv")
+    paths = c(
+      file.path(folder, "homerResults", "motif*.motif.tsv"),
+      file.path(folder, "homerResults", "motif*.motif.tsv.gz")
+    )
   )
 
   if (length(novel_motif_files) > 0) {
+
+    # Exclude some of the results that are labeled "RV" or "similar".
     novel_motif_files <- novel_motif_files[
       !stringr::str_detect(novel_motif_files, "RV\\.") &
       !stringr::str_detect(novel_motif_files, "\\.similar")
     ]
 
+    message(
+      "Found ",
+      length(novel_motif_files),
+      " motif.tsv[.gz] files in ",
+      file.path(folder, "homerResults")
+    )
+    n_files <- min(length(novel_motif_files), max_files)
+    message(
+      "Reading ", n_files, " of them..."
+    )
+    novel_motif_files <- head(novel_motif_files, n_files)
+
     dat_novel <- do.call(
       rbind.data.frame,
       lapply(novel_motif_files, read_annotatePeaks_tsv)
     )
-    dat_novel <- dat_novel[!is.na(dat_novel$distance_to_peak),]
+    # dat_novel <- dat_novel[!is.na(dat_novel$distance_to_peak),]
     # Order by motif name like "motif1" and then by start position.
     order_novel <- order(
       as.numeric(substr(dat_novel$motif, 6, 10)),
@@ -29,7 +46,7 @@ read_homer_output <- function(folder = "") {
     )
     dat_novel <- dat_novel[order_novel,]
 
-    retval[["novel_motif_targets"]] <- dat_novel
+    retval[["novel_motif_peaks"]] <- dat_novel
   }
 
   # Novel motif transcription factors -----------------------------------------
@@ -38,6 +55,18 @@ read_homer_output <- function(folder = "") {
   )
 
   if (length(html_files) > 0) {
+    message(
+      "Found ",
+      length(html_files),
+      " motif*.info.html files in ",
+      file.path(folder, "homerResults")
+    )
+    n_files <- min(length(html_files), max_files)
+    message(
+      "Reading ", n_files, " of them..."
+    )
+    html_files <- head(html_files, n_files)
+
     html_novel <- do.call(
       rbind.data.frame,
       lapply(html_files, read_findMotifs_html)
@@ -54,15 +83,36 @@ read_homer_output <- function(folder = "") {
 
   # Genes with known motifs in their promoters ----------------------------------
   known_motif_files <- Sys.glob(
-    paths = file.path(folder, "knownResults", "*.motif.tsv")
+    paths = c(
+      file.path(folder, "knownResults", "*.motif.tsv"),
+      file.path(folder, "knownResults", "*.motif.tsv.gz")
+    )
   )
 
   if (length(known_motif_files) > 0) {
+    # Exclude some of the results that are labeled "RV" or "similar".
+    known_motif_files <- known_motif_files[
+      !stringr::str_detect(known_motif_files, "RV\\.") &
+      !stringr::str_detect(known_motif_files, "\\.similar")
+    ]
+
+    message(
+      "Found ",
+      length(known_motif_files),
+      " motif.tsv[.gz] files in ",
+      file.path(folder, "knownResults")
+    )
+    n_files <- min(length(known_motif_files), max_files)
+    message(
+      "Reading ", n_files, " of them..."
+    )
+    known_motif_files <- head(known_motif_files, n_files)
+
     dat_known <- do.call(
       rbind.data.frame,
       lapply(known_motif_files, read_annotatePeaks_tsv)
     )
-    dat_known <- dat_known[!is.na(dat_known$distance_to_peak),]
+    # dat_known <- dat_known[!is.na(dat_known$distance_to_peak),]
     # Order by motif name like "motif1" and then by start position.
     order_known <- order(
       as.numeric(substr(dat_known$motif, 6, 10)),
@@ -70,7 +120,7 @@ read_homer_output <- function(folder = "") {
     )
     dat_known <- dat_known[order_known,]
 
-    retval[["known_motif_targets"]] <- dat_known
+    retval[["known_motif_peaks"]] <- dat_known
   }
 
   return(retval)
@@ -86,7 +136,6 @@ read_annotatePeaks_tsv <- function(motif_file) {
       .default = readr::col_character(),
       Start = readr::col_integer(),
       End = readr::col_integer(),
-      `Not Used` = readr::col_integer(),
       `Distance to TSS` = readr::col_integer(),
       `Entrez ID` = readr::col_integer(),
       `CpG%` = readr::col_double(),
@@ -97,6 +146,9 @@ read_annotatePeaks_tsv <- function(motif_file) {
   # Fix weird columns.
   command <- stringr::str_split_fixed(colnames(dat)[1], " ", 2)[,2]
   colnames(dat)[1] <- stringr::str_split_fixed(colnames(dat)[1], " ", 2)[,1]
+
+  # Discard unannotated rows.
+  dat <- dat[!is.na(dat[[22]]),]
 
   # Column 22 is "<BESTGUESS> Distance From Peak(sequence,strand,conservation)"
   best_guess <- stringr::str_split_fixed(colnames(dat)[22], " ", 2)[,1]
@@ -118,6 +170,18 @@ read_annotatePeaks_tsv <- function(motif_file) {
   colnames(dat) <- stringr::str_replace(colnames(dat), "%", "_percent")
   colnames(dat) <- stringr::str_replace(colnames(dat), "/", "_over_")
 
+  # Data types.
+  dat$peak_score <- as.numeric(dat$peak_score)
+
+  #if (reduce) {
+  #  cols <- c(
+  #    "motif", "peakid", "distance_to_peak", "peak_sequence", "peak_strand"
+  #  )
+  #  return(list(
+  #    best_guess = dat$best_guess[1],
+  #    motif_peaks = dat[,cols]
+  #  ))
+  #}
   return(dat)
 }
 
@@ -129,7 +193,7 @@ read_findMotifs_html <- function(html_file) {
 
   # Get the text inside h4 elements:
   o <- XML::getNodeSet(doc, "//h4")
-  match_names <- sapply(o, xmlValue)
+  match_names <- sapply(o, XML::xmlValue)
 
   o <- XML::getNodeSet(doc, "//table")
   x <- lapply(3:length(o), function(i) {
