@@ -9,4 +9,3 @@ read_findMotifs_html(html_file)
 \description{
 Read a HOMER HTML file.
 }
-

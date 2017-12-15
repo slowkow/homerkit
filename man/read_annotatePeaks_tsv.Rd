@@ -9,4 +9,3 @@ read_annotatePeaks_tsv(motif_file)
 \description{
 Read a HOMER motif file.
 }
-

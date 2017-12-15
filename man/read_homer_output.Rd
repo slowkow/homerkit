@@ -4,9 +4,8 @@
 \alias{read_homer_output}
 \title{Read known and novel motif outputs from a HOMER output folder.}
 \usage{
-read_homer_output(folder = "")
+read_homer_output(folder = "", max_files = 100)
 }
 \description{
 Read known and novel motif outputs from a HOMER output folder.
 }
-
