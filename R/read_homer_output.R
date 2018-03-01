@@ -139,16 +139,25 @@ read_homer_output <- function(folder = "", max_files = 100) {
     read_tsv(
       file      = file.path(folder, "knownResults.txt"),
       col_types = cols(
-        `Motif Name`                                   = col_character(),
-        `Consensus`                                    = col_character(),
-        `P-value`                                      = col_double(),
-        `Log P-value`                                  = col_double(),
-        `q-value (Benjamini)`                          = col_double(),
-        `# of Target Sequences with Motif(of 60)`      = col_double(),
-        `% of Target Sequences with Motif`             = col_character(),
-        `# of Background Sequences with Motif(of 490)` = col_double(),
-        `% of Background Sequences with Motif`         = col_character()
+        col_character(),
+        col_character(),
+        col_double(),
+        col_double(),
+        col_double(),
+        col_double(),
+        col_character(),
+        col_double(),
+        col_character()
       )
+        #`Motif Name`                                   = col_character(),
+        #`Consensus`                                    = col_character(),
+        #`P-value`                                      = col_double(),
+        #`Log P-value`                                  = col_double(),
+        #`q-value (Benjamini)`                          = col_double(),
+        #`# of Target Sequences with Motif(of 60)`      = col_double(),
+        #`% of Target Sequences with Motif`             = col_character(),
+        #`# of Background Sequences with Motif(of 490)` = col_double(),
+        #`% of Background Sequences with Motif`         = col_character()
     )
   )
 
